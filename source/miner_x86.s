@@ -203,7 +203,7 @@ sha256_12_hashing__mine_lfcs:
     inc     ep1
 
     cmp     ep1, ep2
-    jnz     refill_lfcs__mine_lfcs
+    jle     refill_lfcs__mine_lfcs
 
 result_false__mine_lfcs:
     mov     rax, 0 # false
