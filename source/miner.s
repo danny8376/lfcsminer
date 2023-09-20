@@ -47,8 +47,8 @@
 
 
 # ---- volatile
-#define RND     r8w
-#define RND32   r8d
+#define RND     r9w
+#define RND32   r9d
 
 #define DAT0    xmm3
 #define DAT12   xmm4
@@ -64,7 +64,7 @@
 #define MSG3    xmm15
 
 .global mine_lfcs
-mine_lfcs: # uint32_t start_lfcs, uint32_t end_lfcs, uint64_t target_hash, uint32_t *rnd
+mine_lfcs: # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint32_t *rnd
     push    rbp
     mov     rbp, rsp
     # store xmm10-15 x6
@@ -85,11 +85,15 @@ mine_lfcs: # uint32_t start_lfcs, uint32_t end_lfcs, uint64_t target_hash, uint3
     pinsrq  DAT3, rax, 1
     # RND
     mov     RND, 0x0
+    # prepare new flag (need to be highest 16bit)
+    rol     rdx, 48
 
 refill_lfcs__mine_lfcs:
     # DAT0
     bswap   edi
-    movq    DAT0, rdi # start_lfcs
+    mov     rax, rdx
+    or      rax, rdi # start_lfcs
+    movq    DAT0, rax
     mov     rax, 0x8000000000000000
     pinsrq  DAT0, rax, 1
 
@@ -167,7 +171,7 @@ sha256_12_hashing__mine_lfcs:
     # result hash in high 64bit of STATE1 (swapped double dword)
     pextrq  rax, STATE1, 1
 
-    cmp     rax, rdx
+    cmp     rax, rcx
     jz      result_true__mine_lfcs
 
     inc     RND
@@ -193,7 +197,7 @@ result_return__mine_lfcs:
     rol     rsi, 32
     bswap   edi
     or      rsi, rdi
-    mov     [rcx], rsi
+    mov     [r8], rsi
 
     _sp2xmm(10, 0)
     _sp2xmm(11, 1)
