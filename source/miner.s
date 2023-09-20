@@ -17,6 +17,46 @@ name:
 
 #endif
 
+#ifdef _WIN32
+
+#define rp1 rcx
+#define rp2 rdx
+#define rp3 r8
+#define rp4 r9
+
+#define ep1 ecx
+#define ep2 edx
+#define ep3 r8d
+#define ep4 r9d
+
+#define p1 cx
+#define p2 dx
+#define p3 r8w
+#define p4 r9w
+
+#define p5ptr [rbp+0x48]
+
+#else
+
+#define rp1 rdi
+#define rp2 rsi
+#define rp3 rdx
+#define rp4 rcx
+
+#define ep1 edi
+#define ep2 esi
+#define ep3 edx
+#define ep4 ecx
+
+#define p1 di
+#define p2 si
+#define p3 dx
+#define p4 cx
+
+#define p5ptr [r8]
+
+#endif
+
 #define _xmm2sp(offset, regn) \
     movdqa  [rsp+16*offset], xmm##regn ;
 #define _sp2xmm(regn, offset) \
@@ -64,8 +104,8 @@ name:
 
 
 # ---- volatile
-#define RND     r9w
-#define RND32   r9d
+#define RND     r10w
+#define RND32   r10d
 
 #define DAT0    xmm3
 #define DAT12   xmm4
@@ -102,13 +142,13 @@ _func(mine_lfcs) # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, ui
     # RND
     mov     RND, 0x0
     # prepare new flag (need to be highest 16bit)
-    rol     rdx, 48
+    rol     rp3, 48
 
 refill_lfcs__mine_lfcs:
     # DAT0
-    bswap   edi
-    mov     rax, rdx
-    or      rax, rdi # start_lfcs
+    bswap   ep1
+    mov     rax, rp3
+    or      rax, rp1 # start_lfcs
     movq    DAT0, rax
     mov     rax, 0x8000000000000000
     pinsrq  DAT0, rax, 1
@@ -187,16 +227,16 @@ sha256_12_hashing__mine_lfcs:
     # result hash in high 64bit of STATE1 (swapped double dword)
     pextrq  rax, STATE1, 1
 
-    cmp     rax, rcx
+    cmp     rax, rp4
     jz      result_true__mine_lfcs
 
     inc     RND
     jnz     sha256_12_hashing__mine_lfcs
 
-    bswap   edi
-    inc     edi
+    bswap   ep1
+    inc     ep1
 
-    cmp     edi, esi
+    cmp     ep1, ep2
     jnz     refill_lfcs__mine_lfcs
 
 result_false__mine_lfcs:
@@ -207,13 +247,13 @@ result_true__mine_lfcs:
     mov     rax, 1 # true
 
 result_return__mine_lfcs:
-    mov     rsi, 0
-    #mov     si, RND
-    mov     esi, RND32
-    rol     rsi, 32
-    bswap   edi
-    or      rsi, rdi
-    mov     [r8], rsi
+    mov     rp2, 0
+    #mov     p2, RND
+    mov     ep2, RND32
+    rol     rp2, 32
+    bswap   ep1
+    or      rp2, rp1
+    mov     p5ptr, rp2
 
     _sp2xmm(10, 0)
     _sp2xmm(11, 1)
