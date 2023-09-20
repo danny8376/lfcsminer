@@ -3,6 +3,20 @@
 # adopted from: https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-x86.c
 # ref: https://github.com/zoogie/bfCL/blob/master/cl/sha256_16.cl
 
+#ifdef __APPLE__
+
+#define _func(name) \
+.global _##name ; \
+_##name:
+
+#else
+
+#define _func(name) \
+.global name ; \
+name:
+
+#endif
+
 #define _xmm2sp(offset, regn) \
     movdqa  [rsp+16*offset], xmm##regn ;
 #define _sp2xmm(regn, offset) \
@@ -46,7 +60,7 @@
     sha256msg1  pmsg, msg ;
 
 
-.section .text
+.text
 
 
 # ---- volatile
@@ -66,8 +80,7 @@
 #define MSG2    xmm14
 #define MSG3    xmm15
 
-.global mine_lfcs
-mine_lfcs: # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
+_func(mine_lfcs) # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
     push    rbp
     mov     rbp, rsp
     # store xmm10-15 x6
