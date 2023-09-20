@@ -24,6 +24,8 @@ typedef UINT8 uint8_t;
 #endif
 
 
+int is_supported_platform();
+
 uint64_t mine_lfcs(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
 
 
@@ -35,8 +37,7 @@ int main(int argc, char **argv)
     uint64_t target = 0,
              result = 0;
 
-    __builtin_cpu_init();
-    if (!__builtin_cpu_supports("sha") || !__builtin_cpu_supports ("sse4.1")) {
+    if (!is_supported_platform()) {
         printf("this program require sha extension and sse4.1 support\n");
         return -3;
     }
