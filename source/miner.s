@@ -57,36 +57,32 @@ name:
 
 #endif
 
+
+#define _xmmd(name) xmmword ptr [rip+name]
+#define _qdat(name)   qword ptr [rip+name]
+#define _ddat(name)   dword ptr [rip+name]
+
 #define _xmm2sp(offset, regn) \
     movdqa  [rsp+16*offset], xmm##regn ;
 #define _sp2xmm(regn, offset) \
     movdqa  xmm##regn, [rsp+16*offset] ;
-#define _xmmldr(tmpr, reg, high, low) \
-    mov     tmpr, low ; \
-    movq    reg, tmpr ; \
-    mov     tmpr, high ; \
-    pinsrq  reg, tmpr, 1 ;
-#define _xmmldr1(tmpr, reg, v) \
-    mov     tmpr, v ; \
-    movq    reg, tmpr ; \
-    pinsrq  reg, tmpr, 1 ;
 
 #define _shasr1(s0, s1, tmpr, regt, msg, k) \
     movdqa  regt, msg ; \
-    paddd   regt, xmmword ptr [rip+k] ; \
+    paddd   regt, _xmmd(k) ; \
     sha256rnds2 s1, s0, regt ; \
     pshufd  regt, regt, 0xE ; \
     sha256rnds2 s0, s1, regt ;
 #define _shasr2(s0, s1, tmpr, regt, msg, pmsg, k) \
     movdqa  regt, msg ; \
-    paddd   regt, xmmword ptr [rip+k] ; \
+    paddd   regt, _xmmd(k) ; \
     sha256rnds2 s1, s0, regt ; \
     pshufd  regt, regt, 0xE ; \
     sha256rnds2 s0, s1, regt ; \
     sha256msg1  pmsg, msg ;
 #define _shasr3(s0, s1, tmpr, regt, regt2, msg, pmsg, nmsg, k) \
     movdqa  regt, msg ; \
-    paddd   regt, xmmword ptr [rip+k] ; \
+    paddd   regt, _xmmd(k) ; \
     sha256rnds2 s1, s0, regt ; \
     movdqa  regt2, msg ; \
     palignr regt2, pmsg, 4 ; \
@@ -133,13 +129,11 @@ name:
 .text
 
 
-# ---- volatile
+# ---- volatile ----
 #define RND     r10w
 #define RND32   r10d
 
 #define DAT0    xmm3
-#define DAT12   xmmword ptr [rip+D12]
-#define DAT3    xmmword ptr [rip+D3]
 
 # ---- non-volatile ----
 #define STATE0  xmm10
@@ -174,7 +168,7 @@ refill_lfcs__mine_lfcs:
     mov     rax, rp3
     or      rax, rp1 # start_lfcs
     movq    DAT0, rax
-    pinsrq  DAT0, qword ptr [rip+CD], 1
+    pinsrq  DAT0, _qdat(CD), 1
 
 sha256_12_hashing__mine_lfcs:
     # --------------------------------
@@ -183,23 +177,23 @@ sha256_12_hashing__mine_lfcs:
     pinsrw  DAT0, RND32, 2
 
     # init state, pre shuffled
-    movdqa  STATE0, xmmword ptr [rip+I0]
-    movdqa  STATE1, xmmword ptr [rip+I1]
+    movdqa  STATE0, _xmmd(I0)
+    movdqa  STATE1, _xmmd(I1)
 
     # rounds 0-3
     movdqa  MSG0, DAT0
     _shasr1 (STATE0, STATE1, rax, xmm0, MSG0, C0)
 
     # rounds 4-7
-    movdqa  MSG1, DAT12
+    movdqa  MSG1, _xmmd(D12)
     _shasr2 (STATE0, STATE1, rax, xmm0, MSG1, MSG0, C1)
 
     # rounds 8-11
-    movdqa  MSG2, DAT12
+    movdqa  MSG2, _xmmd(D12)
     _shasr2 (STATE0, STATE1, rax, xmm0, MSG2, MSG1, C2)
 
     # rounds 12-15
-    movdqa  MSG3, DAT3
+    movdqa  MSG3, _xmmd(D3)
     _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG3, MSG2, MSG0, C3)
 
     # rounds 16-19
@@ -239,7 +233,7 @@ sha256_12_hashing__mine_lfcs:
     _shasr1 (STATE0, STATE1, rax, xmm0, MSG3, C15)
 
     # combine state 
-    paddd   STATE1, xmmword ptr [rip+S]
+    paddd   STATE1, _xmmd(S)
     pshufd  xmm0, STATE0, 0x1B
     pshufd  STATE1, STATE1, 0xB1
     movdqa  STATE0, xmm0
