@@ -35,6 +35,12 @@ int main(int argc, char **argv)
     uint64_t target = 0,
              result = 0;
 
+    __builtin_cpu_init();
+    if (!__builtin_cpu_supports("sha") || !__builtin_cpu_supports ("sse4.1")) {
+        printf("this program require sha extension and sse4.1 support\n");
+        return -3;
+    }
+
     if(argc!=5){
         #ifdef _WIN32
         printf("lfcsminer <start_lfcs> <end_lfcs> <new_flag> <target_hash>\nNote that all values interpreted as hex\n");
