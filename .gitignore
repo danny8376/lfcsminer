@@ -54,3 +54,5 @@ dkms.conf
 build/
 lfcsminer
 lfcsminer.exe
+
+movable_part1.sed
