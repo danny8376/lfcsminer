@@ -3,6 +3,8 @@
 # adopted from: https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-x86.c
 # ref: https://github.com/zoogie/bfCL/blob/master/cl/sha256_16.cl
 
+#ifdef __x86_64__
+
 #ifdef __APPLE__
 
 #define _func(name) \
@@ -280,3 +282,5 @@ result_return__mine_lfcs:
     mov     rsp, rbp
     pop     rbp
     ret
+
+#endif
