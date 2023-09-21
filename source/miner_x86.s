@@ -17,20 +17,20 @@
 #define _sp2xmm(regn, offset) \
     movdqa  xmm##regn, [rsp+16*offset] ;
 
-#define _shasr1(s0, s1, tmpr, regt, msg, k) \
+#define _shasr1(s0, s1, regt, msg, k) \
     movdqa  regt, msg ; \
     paddd   regt, _xmmd(k) ; \
     sha256rnds2 s1, s0, regt ; \
     pshufd  regt, regt, 0xE ; \
     sha256rnds2 s0, s1, regt ;
-#define _shasr2(s0, s1, tmpr, regt, msg, pmsg, k) \
+#define _shasr2(s0, s1, regt, msg, pmsg, k) \
     movdqa  regt, msg ; \
     paddd   regt, _xmmd(k) ; \
     sha256rnds2 s1, s0, regt ; \
     pshufd  regt, regt, 0xE ; \
     sha256rnds2 s0, s1, regt ; \
     sha256msg1  pmsg, msg ;
-#define _shasr3(s0, s1, tmpr, regt, regt2, msg, pmsg, nmsg, k) \
+#define _shasr3(s0, s1, regt, regt2, msg, pmsg, nmsg, k) \
     movdqa  regt, msg ; \
     paddd   regt, _xmmd(k) ; \
     sha256rnds2 s1, s0, regt ; \
@@ -132,55 +132,55 @@ sha256_12_hashing__mine_lfcs:
 
     # rounds 0-3
     movdqa  MSG0, DAT0
-    _shasr1 (STATE0, STATE1, rax, xmm0, MSG0, C0)
+    _shasr1 (STATE0, STATE1, xmm0, MSG0, C0)
 
     # rounds 4-7
     movdqa  MSG1, _xmmd(D12)
-    _shasr2 (STATE0, STATE1, rax, xmm0, MSG1, MSG0, C1)
+    _shasr2 (STATE0, STATE1, xmm0, MSG1, MSG0, C1)
 
     # rounds 8-11
     movdqa  MSG2, _xmmd(D12)
-    _shasr2 (STATE0, STATE1, rax, xmm0, MSG2, MSG1, C2)
+    _shasr2 (STATE0, STATE1, xmm0, MSG2, MSG1, C2)
 
     # rounds 12-15
     movdqa  MSG3, _xmmd(D3)
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG3, MSG2, MSG0, C3)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG3, MSG2, MSG0, C3)
 
     # rounds 16-19
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG0, MSG3, MSG1, C4)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG0, MSG3, MSG1, C4)
 
     # rounds 20-23
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG1, MSG0, MSG2, C5)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG1, MSG0, MSG2, C5)
 
     # rounds 24-27
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG2, MSG1, MSG3, C6)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG2, MSG1, MSG3, C6)
 
     # rounds 28-31
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG3, MSG2, MSG0, C7)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG3, MSG2, MSG0, C7)
 
     # rounds 32-35
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG0, MSG3, MSG1, C8)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG0, MSG3, MSG1, C8)
 
     # rounds 36-39
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG1, MSG0, MSG2, C9)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG1, MSG0, MSG2, C9)
 
     # rounds 40-43
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG2, MSG1, MSG3, C10)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG2, MSG1, MSG3, C10)
 
     # rounds 44-47
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG3, MSG2, MSG0, C11)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG3, MSG2, MSG0, C11)
 
     # rounds 48-51
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG0, MSG3, MSG1, C12)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG0, MSG3, MSG1, C12)
 
     # rounds 52-55
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG1, MSG0, MSG2, C13)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG1, MSG0, MSG2, C13)
 
     # rounds 56-59
-    _shasr3 (STATE0, STATE1, rax, xmm0, xmm1, MSG2, MSG1, MSG3, C14)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG2, MSG1, MSG3, C14)
 
     # rounds 60-63
-    _shasr1 (STATE0, STATE1, rax, xmm0, MSG3, C15)
+    _shasr1 (STATE0, STATE1, xmm0, MSG3, C15)
 
     # combine state 
     paddd   STATE1, _xmmd(S)
