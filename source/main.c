@@ -26,7 +26,7 @@ typedef UINT8 uint8_t;
 
 int is_supported_platform();
 
-uint64_t mine_lfcs(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
+uint64_t mine_lfcs_x2(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
 
 
 int main(int argc, char **argv)
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     target = strtoull(argv[4], NULL, 16);
     target = (target << 32) | (target >> 32);
 
-    if (!mine_lfcs(start, end, newflag, target, &result)) {
+    if (!mine_lfcs_x2(start, end, newflag, target, &result)) {
         fprintf(stderr, "no hit\n");
         return 1;
     }

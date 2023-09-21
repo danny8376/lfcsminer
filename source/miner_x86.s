@@ -182,7 +182,7 @@ sha256_12_hashing__mine_lfcs:
     # rounds 60-63
     _shasr1 (STATE0, STATE1, xmm0, MSG3, C15)
 
-    # combine state 
+    # combine state
     paddd   STATE1, _xmmd(S)
     pshufd  xmm0, STATE0, 0x1B
     pshufd  STATE1, STATE1, 0xB1
@@ -227,6 +227,215 @@ result_return__mine_lfcs:
     _sp2xmm(13, 3)
     _sp2xmm(14, 4)
     _sp2xmm(15, 5)
+    mov     rsp, rbp
+    pop     rbp
+    ret
+
+
+# ---- volatile ----
+#       RND     r10w
+#       RND32   r10d
+
+#       DAT0    xmm3
+#define DAT0X   xmm2
+
+#define MSG2X   xmm5
+#define MSG3X   xmm4
+
+# ---- non-volatile ----
+#       STATE0  xmm10
+#       STATE1  xmm11
+
+#       MSG0    xmm12
+#       MSG1    xmm13
+#       MSG2    xmm14
+#       MSG3    xmm15
+
+#define STATE0X xmm9
+#define STATE1X xmm8
+
+#define MSG0X   xmm7
+#define MSG1X   xmm6
+
+_func(mine_lfcs_x2) # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
+    push    rbp
+    mov     rbp, rsp
+    # store xmm6-15 x10
+    lea     rsp, [rsp-16*10]
+    _xmm2sp(0, 6)
+    _xmm2sp(1, 7)
+    _xmm2sp(2, 8)
+    _xmm2sp(3, 9)
+    _xmm2sp(4, 10)
+    _xmm2sp(5, 11)
+    _xmm2sp(6, 12)
+    _xmm2sp(7, 13)
+    _xmm2sp(8, 14)
+    _xmm2sp(9, 15)
+    # --------------------------------
+    # | prepare data
+    # RND
+    mov     RND, 0x0
+    # prepare new flag (need to be highest 16bit)
+    rol     rp3, 48
+
+refill_lfcs__mine_lfcs_x2:
+    # DAT0
+    bswap   ep1
+    mov     rax, rp3
+    or      rax, rp1 # start_lfcs
+    movq    DAT0, rax
+    pinsrq  DAT0, _qdat(CD), 1
+
+    movdqa  DAT0X, DAT0
+
+sha256_12_hashing__mine_lfcs_x2:
+    # --------------------------------
+    # | ctual sha256_12 hashing
+    # inject rnd into DAT0
+    pinsrw  DAT0, RND32, 2
+    inc     RND
+    pinsrw  DAT0X, RND32, 2
+
+    # init state, pre shuffled
+    movdqa  STATE0, _xmmd(I0)
+    movdqa  STATE0X, _xmmd(I0)
+    movdqa  STATE1, _xmmd(I1)
+    movdqa  STATE1X, _xmmd(I1)
+
+    # rounds 0-3
+    movdqa  MSG0, DAT0
+    _shasr1 (STATE0, STATE1, xmm0, MSG0, C0)
+    movdqa  MSG0X, DAT0X
+    _shasr1 (STATE0X, STATE1X, xmm0, MSG0X, C0)
+
+    # rounds 4-7
+    movdqa  MSG1, _xmmd(D12)
+    movdqa  MSG1X, _xmmd(D12)
+    _shasr2 (STATE0, STATE1, xmm0, MSG1, MSG0, C1)
+    _shasr2 (STATE0X, STATE1X, xmm0, MSG1X, MSG0X, C1)
+
+    # rounds 8-11
+    movdqa  MSG2, _xmmd(D12)
+    movdqa  MSG2X, _xmmd(D12)
+    _shasr2 (STATE0, STATE1, xmm0, MSG2, MSG1, C2)
+    _shasr2 (STATE0X, STATE1X, xmm0, MSG2X, MSG1X, C2)
+
+    # rounds 12-15
+    movdqa  MSG3, _xmmd(D3)
+    movdqa  MSG3X, _xmmd(D3)
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG3, MSG2, MSG0, C3)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG3X, MSG2X, MSG0X, C3)
+
+    # rounds 16-19
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG0, MSG3, MSG1, C4)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG0X, MSG3X, MSG1X, C4)
+
+    # rounds 20-23
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG1, MSG0, MSG2, C5)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG1X, MSG0X, MSG2X, C5)
+
+    # rounds 24-27
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG2, MSG1, MSG3, C6)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG2X, MSG1X, MSG3X, C6)
+
+    # rounds 28-31
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG3, MSG2, MSG0, C7)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG3X, MSG2X, MSG0X, C7)
+
+    # rounds 32-35
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG0, MSG3, MSG1, C8)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG0X, MSG3X, MSG1X, C8)
+
+    # rounds 36-39
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG1, MSG0, MSG2, C9)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG1X, MSG0X, MSG2X, C9)
+
+    # rounds 40-43
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG2, MSG1, MSG3, C10)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG2X, MSG1X, MSG3X, C10)
+
+    # rounds 44-47
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG3, MSG2, MSG0, C11)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG3X, MSG2X, MSG0X, C11)
+
+    # rounds 48-51
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG0, MSG3, MSG1, C12)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG0X, MSG3X, MSG1X, C12)
+
+    # rounds 52-55
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG1, MSG0, MSG2, C13)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG1X, MSG0X, MSG2X, C13)
+
+    # rounds 56-59
+    _shasr3 (STATE0, STATE1, xmm0, xmm1, MSG2, MSG1, MSG3, C14)
+    _shasr3 (STATE0X, STATE1X, xmm0, xmm1, MSG2X, MSG1X, MSG3X, C14)
+
+    # rounds 60-63
+    _shasr1 (STATE0, STATE1, xmm0, MSG3, C15)
+    _shasr1 (STATE0X, STATE1X, xmm0, MSG3X, C15)
+
+    # combine state
+    paddd   STATE1, _xmmd(S)
+    pshufd  xmm0, STATE0, 0x1B
+    pshufd  STATE1, STATE1, 0xB1
+    movdqa  STATE0, xmm0
+    pblendw STATE0, STATE1, 0xF0
+    palignr STATE1, xmm0, 8
+
+    paddd   STATE1X, _xmmd(S)
+    pshufd  xmm0, STATE0X, 0x1B
+    pshufd  STATE1X, STATE1X, 0xB1
+    movdqa  STATE0X, xmm0
+    pblendw STATE0X, STATE1X, 0xF0
+    palignr STATE1X, xmm0, 8
+
+    # result hash in high 64bit of STATE1 (swapped double dword)
+    pextrq  rax, STATE1, 1
+
+    cmp     rax, rp4
+    jz      result_true__mine_lfcs_x2
+
+    pextrq  rax, STATE1X, 1
+
+    cmp     rax, rp4
+    jz      result_true__mine_lfcs_x2
+
+    inc     RND
+    jnz     sha256_12_hashing__mine_lfcs_x2
+
+    bswap   ep1
+    inc     ep1
+
+    cmp     ep1, ep2
+    jle     refill_lfcs__mine_lfcs_x2
+
+result_false__mine_lfcs_x2:
+    mov     rax, 0 # false
+    jmp     result_return__mine_lfcs_x2
+
+result_true__mine_lfcs_x2:
+    mov     rax, 1 # true
+
+result_return__mine_lfcs_x2:
+    mov     rp2, 0
+    #mov     p2, RND
+    mov     ep2, RND32
+    rol     rp2, 32
+    bswap   ep1
+    or      rp2, rp1
+    mov     p5ptr, rp2
+
+    _sp2xmm(6, 0)
+    _sp2xmm(7, 1)
+    _sp2xmm(8, 2)
+    _sp2xmm(9, 3)
+    _sp2xmm(10, 4)
+    _sp2xmm(11, 5)
+    _sp2xmm(12, 6)
+    _sp2xmm(13, 7)
+    _sp2xmm(14, 8)
+    _sp2xmm(15, 9)
     mov     rsp, rbp
     pop     rbp
     ret
