@@ -114,6 +114,8 @@ int main(int argc, char **argv)
 
     uint32_t lfcs = result & 0xFFFFFFFF;
     uint16_t rnd = result >> 32;
+    uint64_t tested = (lfcs - start) * 0x10000 + rnd;
+
     printf("got a hit: 0x%08x (rnd: 0x%04x)\n", lfcs, rnd);
 
     uint8_t part1[0x1000] = {0};
@@ -124,7 +126,7 @@ int main(int argc, char **argv)
         printf("existing movable_part1.sed found, adding lfcs...\n");
         fwrite(part1, 1, 8, f);
         fclose(f);
-        printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, (end - start) * 0x10000 * 1.0 / td);
+        printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, tested * 1.0 / td);
         return 0;
     }
 
@@ -134,11 +136,11 @@ int main(int argc, char **argv)
         fwrite(part1, 1, 0x1000, f);
         printf("don't you dare forget to add the id0 to it!\n");
         fclose(f);
-        printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, (end - start) * 0x10000 * 1.0 / td);
+        printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, tested * 1.0 / td);
         return 0;
     }
 
     fprintf(stderr, "can't open movable_part1.sed to write\n");
-    printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, (end - start) * 0x10000 * 1.0 / td);
+    printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, tested * 1.0 / td);
     return -2;
 }
