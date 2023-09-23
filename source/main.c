@@ -1,21 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
-// Include the GCC super header
-#if defined(__GNUC__)
-# include <x86intrin.h>
-#endif
-
 #if defined(_MSC_VER)
-
-// Microsoft supports Intel SHA ACLE extensions as of Visual Studio 2015
-# include <immintrin.h>
-# define WIN32_LEAN_AND_MEAN
-# include <Windows.h>
-typedef UINT32 uint32_t;
-typedef UINT8 uint8_t;
 
 typedef LARGE_INTEGER TimeHP;
 #define get_hp_time QueryPerformanceCounter

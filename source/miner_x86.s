@@ -1,9 +1,8 @@
+#ifdef __x86_64__
 .intel_syntax noprefix
 
 # adopted from: https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-x86.c
 # ref: https://github.com/zoogie/bfCL/blob/master/cl/sha256_16.cl
-
-#ifdef __x86_64__
 
 #include "asm_common_x86.h"
 
