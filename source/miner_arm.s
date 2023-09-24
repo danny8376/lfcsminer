@@ -4,7 +4,7 @@
 # adopted from: https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-arm.c
 # ref: https://github.com/zoogie/bfCL/blob/master/cl/sha256_16.cl
 
-#include "asm_common.h"
+#include "asm_common_arm.h"
 
 
 #define _V(n) v ## n
@@ -80,7 +80,7 @@
 
 # ---- non-volatile ----
 
-_func(mine_lfcs) # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
+_func(mine_lfcs) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
     mov     x10, x0
     mov     x11, x1
     mov     x12, x2
