@@ -447,6 +447,7 @@ result_return__mine_lfcs_x2:
 
 #define RDAT0    7
 
+// ---- non-volatile ----
 #define RTMP0    8
 #define RTMP1    9
 
@@ -457,8 +458,6 @@ result_return__mine_lfcs_x2:
 #define RMSG1    13
 #define RMSG2    14
 #define RMSG3    15
-
-// ---- non-volatile ----
 
 _func(mine_lfcs_rk) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
     sub     sp, sp, #32
