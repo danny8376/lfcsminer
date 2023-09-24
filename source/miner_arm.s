@@ -83,6 +83,9 @@
 
 #define DAT0    16
 
+#define TMP0    24
+#define TMP1    25
+
 #define STATE0  26
 #define STATE1  27
 
@@ -132,57 +135,57 @@ sha256_12_hashing__mine_lfcs:
 
     ldr     x0, =C0
     ld1     { v0.16b }, [x0]
-    add     v0.4s, V(MSG0).4s, v0.4s
+    add     V(TMP0).4s, V(MSG0).4s, v0.4s
 
     // rounds 0-3
-    _shasr1 (STATE0, STATE1, x0, 0, 1, 2, MSG0, MSG1, MSG2, MSG3, C1)
+    _shasr1 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, C1)
 
     // rounds 4-7
-    _shasr1 (STATE0, STATE1, x0, 1, 0, 2, MSG1, MSG2, MSG3, MSG0, C2)
+    _shasr1 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, C2)
 
     // rounds 8-11
-    _shasr1 (STATE0, STATE1, x0, 0, 1, 2, MSG2, MSG3, MSG0, MSG1, C3)
+    _shasr1 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, C3)
 
     // rounds 12-15
-    _shasr1 (STATE0, STATE1, x0, 1, 0, 2, MSG3, MSG0, MSG1, MSG2, C4)
+    _shasr1 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, C4)
 
     // rounds 16-19
-    _shasr1 (STATE0, STATE1, x0, 0, 1, 2, MSG0, MSG1, MSG2, MSG3, C5)
+    _shasr1 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, C5)
 
     // rounds 20-23
-    _shasr1 (STATE0, STATE1, x0, 1, 0, 2, MSG1, MSG2, MSG3, MSG0, C6)
+    _shasr1 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, C6)
 
     // rounds 24-27
-    _shasr1 (STATE0, STATE1, x0, 0, 1, 2, MSG2, MSG3, MSG0, MSG1, C7)
+    _shasr1 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, C7)
 
     // rounds 28-31
-    _shasr1 (STATE0, STATE1, x0, 1, 0, 2, MSG3, MSG0, MSG1, MSG2, C8)
+    _shasr1 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, C8)
 
     // rounds 32-35
-    _shasr1 (STATE0, STATE1, x0, 0, 1, 2, MSG0, MSG1, MSG2, MSG3, C9)
+    _shasr1 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, C9)
 
     // rounds 36-39
-    _shasr1 (STATE0, STATE1, x0, 1, 0, 2, MSG1, MSG2, MSG3, MSG0, C10)
+    _shasr1 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, C10)
 
     // rounds 40-43
-    _shasr1 (STATE0, STATE1, x0, 0, 1, 2, MSG2, MSG3, MSG0, MSG1, C11)
+    _shasr1 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, C11)
 
     // rounds 44-47
-    _shasr1 (STATE0, STATE1, x0, 1, 0, 2, MSG3, MSG0, MSG1, MSG2, C12)
+    _shasr1 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, C12)
 
     // rounds 48-51
-    _shasr2 (STATE0, STATE1, x0, 0, 1, 2, MSG1, C13)
+    _shasr2 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG1, C13)
 
     // rounds 52-55
-    _shasr2 (STATE0, STATE1, x0, 1, 0, 2, MSG2, C14)
+    _shasr2 (STATE0, STATE1, x0, TMP1, TMP0, 0, MSG2, C14)
 
     // rounds 56-59
-    _shasr2 (STATE0, STATE1, x0, 0, 1, 2, MSG3, C15)
+    _shasr2 (STATE0, STATE1, x0, TMP0, TMP1, 0, MSG3, C15)
 
     // rounds 60-63
-    mov     v2.16b, V(STATE0).16b
-    sha256h     Q(STATE0), Q(STATE1), v1.4s
-    sha256h2    Q(STATE1), q2, v1.4s
+    mov     v0.16b, V(STATE0).16b
+    sha256h     Q(STATE0), Q(STATE1), V(TMP1).4s
+    sha256h2    Q(STATE1), q0, V(TMP1).4s
 
     // combine state
     ldr     x0, =I1
@@ -229,7 +232,10 @@ result_return__mine_lfcs:
 // ---- volatile ----
 //      RRND     w9
 
-#define RDAT0    9
+#define RDAT0    7
+
+#define RTMP0    8
+#define RTMP1    9
 
 #define RSTATE0  10
 #define RSTATE1  11
@@ -287,57 +293,57 @@ sha256_12_hashing__mine_lfcs_rk:
     ldr     x0, =D1
     ld1     { V(RMSG1).16b - V(RMSG3).16b }, [x0]
 
-    add     v0.4s, V(RMSG0).4s, v16.4s
+    add     V(RTMP0).4s, V(RMSG0).4s, v16.4s
 
     // rounds 0-3
-    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG0, RMSG1, RMSG2, RMSG3, 17)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 17)
 
     // rounds 4-7
-    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG1, RMSG2, RMSG3, RMSG0, 18)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 18)
 
     // rounds 8-11
-    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG2, RMSG3, RMSG0, RMSG1, 19)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 19)
 
     // rounds 12-15
-    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG3, RMSG0, RMSG1, RMSG2, 20)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 20)
 
     // rounds 16-19
-    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG0, RMSG1, RMSG2, RMSG3, 21)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 21)
 
     // rounds 20-23
-    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG1, RMSG2, RMSG3, RMSG0, 22)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 22)
 
     // rounds 24-27
-    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG2, RMSG3, RMSG0, RMSG1, 23)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 23)
 
     // rounds 28-31
-    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG3, RMSG0, RMSG1, RMSG2, 24)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 24)
 
     // rounds 32-35
-    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG0, RMSG1, RMSG2, RMSG3, 25)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 25)
 
     // rounds 36-39
-    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG1, RMSG2, RMSG3, RMSG0, 26)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 26)
 
     // rounds 40-43
-    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG2, RMSG3, RMSG0, RMSG1, 27)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 27)
 
     // rounds 44-47
-    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG3, RMSG0, RMSG1, RMSG2, 28)
+    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 28)
 
     // rounds 48-51
-    _shasr2r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG1, 29)
+    _shasr2r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG1, 29)
 
     // rounds 52-55
-    _shasr2r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG2, 30)
+    _shasr2r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG2, 30)
 
     // rounds 56-59
-    _shasr2r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG3, 31)
+    _shasr2r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG3, 31)
 
     // rounds 60-63
-    mov     v2.16b, V(RSTATE0).16b
-    sha256h     Q(RSTATE0), Q(RSTATE1), v1.4s
-    sha256h2    Q(RSTATE1), q2, v1.4s
+    mov     v0.16b, V(RSTATE0).16b
+    sha256h     Q(RSTATE0), Q(RSTATE1), V(RTMP1).4s
+    sha256h2    Q(RSTATE1), q0, V(RTMP1).4s
 
     // combine state
     ldr     x0, =I1
