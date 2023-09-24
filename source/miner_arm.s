@@ -247,8 +247,6 @@ result_return__mine_lfcs:
 //      MSG2    30
 //      MSG3    31
 
-#define DAT0X   5
-
 #define TMP0X   6
 #define TMP1X   7
 
