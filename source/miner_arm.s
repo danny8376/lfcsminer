@@ -12,22 +12,24 @@
 #define V(n) _V(n)
 #define Q(n) _Q(n)
 
+#define _vldrk(tmpr, reg, k) \
+    ldr     tmpr, =k ; \
+    ld1     { _V(reg).16b }, [tmpr] ;
+
 #define _shasr1(s0, s1, tmpr, regt, nregt, regt2, msg, msg1, msg2, msg3, k) \
     sha256su0   _V(msg).4s, _V(msg1).4s ; \
     mov     _V(regt2).16b, _V(s0).16b ; \
-    ldr     tmpr, =k ; \
-    ld1     { _V(nregt).16b }, [tmpr] ; \
+    _vldrk  (tmpr, nregt, k) ; \
     add     _V(nregt).4s, _V(msg1).4s, _V(nregt).4s ; \
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
     sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
     sha256su1   _V(msg).4s, _V(msg2).4s, _V(msg3).4s ;
 #define _shasr2(s0, s1, tmpr, regt, nregt, regt2, msg, k) \
     mov     _V(regt2).16b, _V(s0).16b ; \
-    ldr     tmpr, =k ; \
-    ld1     { _V(nregt).16b }, [tmpr] ; \
+    _vldrk  (tmpr, nregt, k) ; \
     add     _V(nregt).4s, _V(msg).4s, _V(nregt).4s ; \
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
-    sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
+    sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ;
 
 #define _shasr1r(s0, s1, tmpr, regt, nregt, regt2, msg, msg1, msg2, msg3, k) \
     sha256su0   _V(msg).4s, _V(msg1).4s ; \
@@ -40,7 +42,7 @@
     mov     _V(regt2).16b, _V(s0).16b ; \
     add     _V(nregt).4s, _V(msg).4s, _V(k).4s ; \
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
-    sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
+    sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ;
 
 
 .data
