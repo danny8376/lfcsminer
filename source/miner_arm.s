@@ -192,11 +192,6 @@ next_lfcs__mine_lfcs:
     rev     w10, w10
     add     w10, w10, #1
 
-    add     x15, x14, #32
-    str     w10, [x15]
-    add     x15, x14, #64
-    str     w11, [x15]
-
     cmp     w10, w11
     bls     refill_lfcs__mine_lfcs
 
