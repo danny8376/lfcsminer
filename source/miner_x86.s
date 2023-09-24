@@ -391,12 +391,12 @@ sha256_12_hashing__mine_lfcs_x2:
     pextrq  rax, STATE1, 1
 
     cmp     rax, rp4
-    jz      result_true__mine_lfcs_x2
+    jz      result_true_rnd0__mine_lfcs_x2
 
     pextrq  rax, STATE1X, 1
 
     cmp     rax, rp4
-    jz      result_true__mine_lfcs_x2
+    jz      result_true_rnd1__mine_lfcs_x2
 
     inc     RND
     jnz     sha256_12_hashing__mine_lfcs_x2
@@ -411,7 +411,10 @@ result_false__mine_lfcs_x2:
     mov     rax, 0 # false
     jmp     result_return__mine_lfcs_x2
 
-result_true__mine_lfcs_x2:
+result_true_rnd0__mine_lfcs_x2:
+    dec     RND
+
+result_true_rnd1__mine_lfcs_x2:
     mov     rax, 1 # true
 
 result_return__mine_lfcs_x2:

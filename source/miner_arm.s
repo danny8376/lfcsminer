@@ -405,10 +405,10 @@ sha256_12_hashing__mine_lfcs_x2:
     mov     x1, V(STATE1X).d[1]
 
     cmp     x0, x13
-    beq     result_true__mine_lfcs_x2
+    beq     result_true_rnd0__mine_lfcs_x2
 
     cmp     x1, x13
-    beq     result_true__mine_lfcs_x2
+    beq     result_true_rnd1__mine_lfcs_x2
 
     add     RND, RND, #1
     cmp     RND, #0x10000
@@ -428,7 +428,10 @@ result_false__mine_lfcs_x2:
     mov     x0, #0 // false
     b       result_return__mine_lfcs_x2
 
-result_true__mine_lfcs_x2:
+result_true_rnd0__mine_lfcs_x2:
+    sub     RND, RND, #1
+
+result_true_rnd1__mine_lfcs_x2:
     mov     x0, #1 // true
 
 result_return__mine_lfcs_x2:
