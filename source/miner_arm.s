@@ -12,8 +12,21 @@
 #define V(n) _V(n)
 #define Q(n) _Q(n)
 
+#ifdef __clang__
+
+#define _ldr(reg, k) \
+    adrp    reg, k@PAGE ; \
+    add     reg, reg, k@PAGEOFF ;
+
+#else
+
+#define _ldr(reg, k) \
+    adr     reg, k ;
+
+#endif
+
 #define _vldrk(tmpr, reg, k) \
-    ldr     tmpr, =k ; \
+    _ldr    (tmpr, k) ; \
     ld1     { _V(reg).16b }, [tmpr] ;
 
 #define _shasr1(s0, s1, tmpr, regt, nregt, regt2, msg, msg1, msg2, msg3, k) \
@@ -85,7 +98,7 @@ refill_lfcs__mine_lfcs:
     rev     w10, w10
     orr     x0, x12, x10 // start_lfcs
     mov     V(DAT0).d[0], x0
-    ldr     x0, =CD
+    _ldr    (x0, CD)
     ld1     { V(DAT0).d }[1], [x0]
 
 sha256_12_hashing__mine_lfcs:
@@ -95,15 +108,15 @@ sha256_12_hashing__mine_lfcs:
     mov     V(DAT0).h[2], RND
 
     // init state, pre shuffled
-    ldr     x0, =I0
+    _ldr    (x0, I0)
     ld1     { V(STATE0).16b, V(STATE1).16b }, [x0]
 
     // init msg
     mov     V(MSG0).16b, V(DAT0).16b
-    ldr     x0, =D1
+    _ldr    (x0, D1)
     ld1     { V(MSG1).16b - V(MSG3).16b }, [x0]
 
-    ldr     x0, =C0
+    _ldr    (x0, C0)
     ld1     { v0.16b }, [x0]
     add     V(TMP0).4s, V(MSG0).4s, v0.4s
 
@@ -158,7 +171,7 @@ sha256_12_hashing__mine_lfcs:
     sha256h2    Q(STATE1), q0, V(TMP1).4s
 
     // combine state
-    ldr     x0, =I1
+    _ldr    (x0, I1)
     ld1     { v0.16b }, [x0]
     add     V(STATE1).4s, V(STATE1).4s, v0.4s
 
@@ -247,14 +260,14 @@ refill_lfcs__mine_lfcs_x2:
     rev     w10, w10
     orr     x0, x12, x10 // start_lfcs
     mov     V(DAT0).d[0], x0
-    ldr     x0, =CD
+    _ldr    (x0, CD)
     ld1     { V(DAT0).d }[1], [x0]
 
 sha256_12_hashing__mine_lfcs_x2:
     // --------------------------------
     // | ctual sha256_12 hashing
     // init state, pre shuffled
-    ldr     x0, =I0
+    _ldr    (x0, I0)
     ld1     { V(STATE0).16b, V(STATE1).16b }, [x0]
     ld1     { V(STATE0X).16b, V(STATE1X).16b }, [x0]
 
@@ -266,11 +279,11 @@ sha256_12_hashing__mine_lfcs_x2:
     mov     V(MSG0X).16b, V(DAT0).16b
     mov     V(MSG0X).h[2], RND
 
-    ldr     x0, =D1
+    _ldr    (x0, D1)
     ld1     { V(MSG1).16b - V(MSG3).16b }, [x0]
     ld1     { V(MSG1X).16b - V(MSG3X).16b }, [x0]
 
-    ldr     x0, =C0
+    _ldr    (x0, C0)
     ld1     { v0.16b }, [x0]
     add     V(TMP0).4s, V(MSG0).4s, v0.4s
     add     V(TMP0X).4s, V(MSG0X).4s, v0.4s
@@ -360,7 +373,7 @@ sha256_12_hashing__mine_lfcs_x2:
     sha256h2    Q(STATE1X), q0, V(TMP1X).4s
 
     // combine state
-    ldr     x0, =I1
+    _ldr    (x0, I1)
     ld1     { v0.16b }, [x0]
     add     V(STATE1).4s, V(STATE1).4s, v0.4s
 
@@ -473,14 +486,14 @@ refill_lfcs__mine_lfcs_x3:
     rev     w10, w10
     orr     x0, x12, x10 // start_lfcs
     mov     V(DAT0Y).d[0], x0
-    ldr     x0, =CD
+    _ldr    (x0, CD)
     ld1     { V(DAT0Y).d }[1], [x0]
 
 sha256_12_hashing__mine_lfcs_x3:
     // --------------------------------
     // | ctual sha256_12 hashing
     // init state, pre shuffled
-    ldr     x0, =I0
+    _ldr    (x0, I0)
     ld1     { V(STATE0).16b, V(STATE1).16b }, [x0]
     ld1     { V(STATE0X).16b, V(STATE1X).16b }, [x0]
     ld1     { V(STATE0Y).16b, V(STATE1Y).16b }, [x0]
@@ -497,12 +510,12 @@ sha256_12_hashing__mine_lfcs_x3:
     mov     V(MSG0Y).16b, V(DAT0Y).16b
     mov     V(MSG0Y).h[2], RND
 
-    ldr     x0, =D1
+    _ldr    (x0, D1)
     ld1     { V(MSG1).16b - V(MSG3).16b }, [x0]
     ld1     { V(MSG1X).16b - V(MSG3X).16b }, [x0]
     ld1     { V(MSG1Y).16b - V(MSG3Y).16b }, [x0]
 
-    ldr     x0, =C0
+    _ldr    (x0, C0)
     ld1     { v0.16b }, [x0]
     add     V(TMP0).4s, V(MSG0).4s, v0.4s
     add     V(TMP0X).4s, V(MSG0X).4s, v0.4s
@@ -612,7 +625,7 @@ sha256_12_hashing__mine_lfcs_x3:
     sha256h2    Q(STATE1Y), q0, V(TMP1Y).4s
 
     // combine state
-    ldr     x0, =I1
+    _ldr    (x0, I1)
     ld1     { v0.16b }, [x0]
     add     V(STATE1).4s, V(STATE1).4s, v0.4s
     add     V(STATE1X).4s, V(STATE1X).4s, v0.4s
@@ -699,7 +712,7 @@ _func(mine_lfcs_rk) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag
     mov     x13, x3
     mov     x14, x4
 
-    ldr     x0, =C0
+    _ldr    (x0, C0)
     ld1     { v16.16b - v19.16b }, [x0], #64
     ld1     { v20.16b - v23.16b }, [x0], #64
     ld1     { v24.16b - v27.16b }, [x0], #64
@@ -716,7 +729,7 @@ refill_lfcs__mine_lfcs_rk:
     rev     w10, w10
     orr     x0, x12, x10 // start_lfcs
     mov     V(RDAT0).d[0], x0
-    ldr     x0, =CD
+    _ldr    (x0, CD)
     ld1     { V(RDAT0).d }[1], [x0]
 
 sha256_12_hashing__mine_lfcs_rk:
@@ -726,12 +739,12 @@ sha256_12_hashing__mine_lfcs_rk:
     mov     V(RDAT0).h[2], RND
 
     // init state, pre shuffled
-    ldr     x0, =I0
+    _ldr    (x0, I0)
     ld1     { V(RSTATE0).16b, V(RSTATE1).16b }, [x0]
 
     // init msg
     mov     V(RMSG0).16b, V(RDAT0).16b
-    ldr     x0, =D1
+    _ldr    (x0, D1)
     ld1     { V(RMSG1).16b - V(RMSG3).16b }, [x0]
 
     add     V(RTMP0).4s, V(RMSG0).4s, v16.4s
@@ -787,7 +800,7 @@ sha256_12_hashing__mine_lfcs_rk:
     sha256h2    Q(RSTATE1), q0, V(RTMP1).4s
 
     // combine state
-    ldr     x0, =I1
+    _ldr    (x0, I1)
     ld1     { v0.16b }, [x0]
     add     V(RSTATE1).4s, V(RSTATE1).4s, v0.4s
 
