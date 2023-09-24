@@ -107,7 +107,7 @@ _func(mine_lfcs) # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, ui
     # RND
     mov     RND, 0x0
     # prepare new flag (need to be highest 16bit)
-    rol     rp3, 48
+    shl     rp3, 48
 
 refill_lfcs__mine_lfcs:
     # DAT0
@@ -213,7 +213,7 @@ result_return__mine_lfcs:
     mov     rp2, 0
     #mov     p2, RND
     mov     ep2, RND32
-    rol     rp2, 32
+    shl     rp2, 32
     bswap   ep1
     or      rp2, rp1
     mov     p5ptr, rp2
@@ -274,7 +274,7 @@ _func(mine_lfcs_x2) # uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag,
     # RND
     mov     RND, 0x0
     # prepare new flag (need to be highest 16bit)
-    rol     rp3, 48
+    shl     rp3, 48
 
 refill_lfcs__mine_lfcs_x2:
     # DAT0
@@ -418,7 +418,7 @@ result_return__mine_lfcs_x2:
     mov     rp2, 0
     #mov     p2, RND
     mov     ep2, RND32
-    rol     rp2, 32
+    shl     rp2, 32
     bswap   ep1
     or      rp2, rp1
     mov     p5ptr, rp2
