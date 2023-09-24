@@ -6,6 +6,8 @@
 # the prefix on the compiler executables
 #---------------------------------------------------------------------------------
 PREFIX		:=	
+ARCH		:= $(shell uname -m)
+OS			:= $(shell uname)
 
 export CC	:=	$(PREFIX)gcc
 export CXX	:=	$(PREFIX)g++
@@ -58,10 +60,21 @@ INCLUDES	:=	include
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	:=	-Wall -Werror -O3 -m64
+CFLAGS	:=	-Wall -Werror -O3
+
+ifeq ($(ARCH), x86_64)
+	CFLAGS	+= -m64 -msha -msse4.1
+endif
+# make 32bit also compile 64bit? (compile only, not sure if even works)
+ifeq ($(ARCH), i386)
+	CFLAGS	+= -m64 -msha -msse4.1
+endif
+ifeq ($(ARCH), i686)
+	CFLAGS	+= -m64 -msha -msse4.1
+endif
 
 CFLAGS	+=	$(INCLUDE)
-ifeq ($(shell uname), Darwin)
+ifeq ($(OS), Darwin)
 	# Assume that we've downloaded OpenSSL through Homebrew
 	CFLAGS	+=	-I/usr/local/opt/openssl/include
 endif
@@ -73,7 +86,7 @@ LDFLAGS	=	-g
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project (order is important)
 #---------------------------------------------------------------------------------
-ifeq ($(shell uname), Darwin)
+ifeq ($(OS), Darwin)
 	# Once again, assume that we've downloaded OpenSSL through Homebrew
 	#LIBS	:=  "/usr/local/opt/openssl/lib/libcrypto.dylib"
 	# If you want to use the OpenSSL crypto static library instead (on macOS), change "/usr/local/opt/openssl/lib/libcrypto.dylib" to "/usr/local/opt/openssl/lib/libcrypto.a" (if you downloaded OpenSSL through Homebrew) with the quotes.
