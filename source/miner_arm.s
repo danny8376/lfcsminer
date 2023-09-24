@@ -443,6 +443,267 @@ result_return__mine_lfcs_x2:
 
 
 // ---- volatile ----
+//      RND     w9
+
+#define DAT0Y   9
+
+//      TMP0    24
+//      TMP1    25
+
+//      STATE0  26
+//      STATE1  27
+
+//      MSG0    28
+//      MSG1    29
+//      MSG2    30
+//      MSG3    31
+
+//      TMP0X   6
+//      TMP1X   7
+
+//      STATE0X 18
+//      STATE1X 19
+
+//      MSG0X   20
+//      MSG1X   21
+//      MSG2X   22
+//      MSG3X   23
+
+#define TMP0Y   10
+#define TMP1Y   11
+
+#define STATE0Y 12
+#define STATE1Y 13
+
+#define MSG0Y   14
+#define MSG1Y   15
+#define MSG2Y   16
+#define MSG3Y   17
+
+// ---- non-volatile ----
+
+_func(mine_lfcs_x3) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
+    sub     sp, sp, #32
+    st1     { v8.1d - v11.1d }, [sp]
+    sub     sp, sp, #32
+    st1     { v12.1d - v15.1d }, [sp]
+    mov     x10, x0
+    mov     x11, x1
+    mov     x12, x2
+    mov     x13, x3
+    mov     x14, x4
+
+    // --------------------------------
+    // | prepare data
+    // RND
+    mov     RND, #0x0
+    // prepare new flag (need to be highest 16bit)
+    lsl     x12, x12, #48
+
+refill_lfcs__mine_lfcs_x3:
+    // DAT0
+    rev     w10, w10
+    orr     x0, x12, x10 // start_lfcs
+    mov     V(DAT0Y).d[0], x0
+    ldr     x0, =CD
+    ld1     { V(DAT0Y).d }[1], [x0]
+
+sha256_12_hashing__mine_lfcs_x3:
+    // --------------------------------
+    // | ctual sha256_12 hashing
+    // init state, pre shuffled
+    ldr     x0, =I0
+    ld1     { V(STATE0).16b, V(STATE1).16b }, [x0]
+    ld1     { V(STATE0X).16b, V(STATE1X).16b }, [x0]
+    ld1     { V(STATE0Y).16b, V(STATE1Y).16b }, [x0]
+
+    // init msg
+    mov     V(MSG0).16b, V(DAT0Y).16b
+    mov     V(MSG0).h[2], RND
+
+    add     RND, RND, #1
+    mov     V(MSG0X).16b, V(DAT0Y).16b
+    mov     V(MSG0X).h[2], RND
+
+    add     RND, RND, #1
+    mov     V(MSG0Y).16b, V(DAT0Y).16b
+    mov     V(MSG0Y).h[2], RND
+
+    ldr     x0, =D1
+    ld1     { V(MSG1).16b - V(MSG3).16b }, [x0]
+    ld1     { V(MSG1X).16b - V(MSG3X).16b }, [x0]
+    ld1     { V(MSG1Y).16b - V(MSG3Y).16b }, [x0]
+
+    ldr     x0, =C0
+    ld1     { v0.16b }, [x0]
+    add     V(TMP0).4s, V(MSG0).4s, v0.4s
+    add     V(TMP0X).4s, V(MSG0X).4s, v0.4s
+    add     V(TMP0Y).4s, V(MSG0Y).4s, v0.4s
+
+    // rounds 0-3
+    _vldrk(x0, 1, C1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG0Y, MSG1Y, MSG2Y, MSG3Y, 1)
+
+    // rounds 4-7
+    _vldrk(x0, 1, C2)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG1Y, MSG2Y, MSG3Y, MSG0Y, 1)
+
+    // rounds 8-11
+    _vldrk(x0, 1, C3)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG2Y, MSG3Y, MSG0Y, MSG1Y, 1)
+
+    // rounds 12-15
+    _vldrk(x0, 1, C4)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG3Y, MSG0Y, MSG1Y, MSG2Y, 1)
+
+    // rounds 16-19
+    _vldrk(x0, 1, C5)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG0Y, MSG1Y, MSG2Y, MSG3Y, 1)
+
+    // rounds 20-23
+    _vldrk(x0, 1, C6)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG1Y, MSG2Y, MSG3Y, MSG0Y, 1)
+
+    // rounds 24-27
+    _vldrk(x0, 1, C7)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG2Y, MSG3Y, MSG0Y, MSG1Y, 1)
+
+    // rounds 28-31
+    _vldrk(x0, 1, C8)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG3Y, MSG0Y, MSG1Y, MSG2Y, 1)
+
+    // rounds 32-35
+    _vldrk(x0, 1, C9)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG0Y, MSG1Y, MSG2Y, MSG3Y, 1)
+
+    // rounds 36-39
+    _vldrk(x0, 1, C10)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG1Y, MSG2Y, MSG3Y, MSG0Y, 1)
+
+    // rounds 40-43
+    _vldrk(x0, 1, C11)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG2Y, MSG3Y, MSG0Y, MSG1Y, 1)
+
+    // rounds 44-47
+    _vldrk(x0, 1, C12)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
+    _shasr1r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG3Y, MSG0Y, MSG1Y, MSG2Y, 1)
+
+    // rounds 48-51
+    _vldrk(x0, 1, C13)
+    _shasr2r(STATE0, STATE1, TMP0, TMP1, 0, MSG1, 1)
+    _shasr2r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG1X, 1)
+    _shasr2r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG1Y, 1)
+
+    // rounds 52-55
+    _vldrk(x0, 1, C14)
+    _shasr2r(STATE0, STATE1, TMP1, TMP0, 0, MSG2, 1)
+    _shasr2r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG2X, 1)
+    _shasr2r(STATE0Y, STATE1Y, TMP1Y, TMP0Y, 0, MSG2Y, 1)
+
+    // rounds 56-59
+    _vldrk(x0, 1, C15)
+    _shasr2r(STATE0, STATE1, TMP0, TMP1, 0, MSG3, 1)
+    _shasr2r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG3X, 1)
+    _shasr2r(STATE0Y, STATE1Y, TMP0Y, TMP1Y, 0, MSG3Y, 1)
+
+    // rounds 60-63
+    mov     v0.16b, V(STATE0).16b
+    sha256h     Q(STATE0), Q(STATE1), V(TMP1).4s
+    sha256h2    Q(STATE1), q0, V(TMP1).4s
+
+    mov     v0.16b, V(STATE0X).16b
+    sha256h     Q(STATE0X), Q(STATE1X), V(TMP1X).4s
+    sha256h2    Q(STATE1X), q0, V(TMP1X).4s
+
+    mov     v0.16b, V(STATE0Y).16b
+    sha256h     Q(STATE0Y), Q(STATE1Y), V(TMP1Y).4s
+    sha256h2    Q(STATE1Y), q0, V(TMP1Y).4s
+
+    // combine state
+    ldr     x0, =I1
+    ld1     { v0.16b }, [x0]
+    add     V(STATE1).4s, V(STATE1).4s, v0.4s
+    add     V(STATE1X).4s, V(STATE1X).4s, v0.4s
+    add     V(STATE1Y).4s, V(STATE1Y).4s, v0.4s
+
+    // result hash in high 64bit of STATE1 (swapped double dword)
+    mov     x0, V(STATE1).d[1]
+    mov     x1, V(STATE1X).d[1]
+    mov     x2, V(STATE1Y).d[1]
+
+    cmp     x0, x13
+    beq     result_true_rnd0__mine_lfcs_x3
+
+    cmp     x1, x13
+    beq     result_true_rnd1__mine_lfcs_x3
+
+    cmp     x2, x13
+    beq     result_true_rnd2__mine_lfcs_x3
+
+    add     RND, RND, #1
+    cmp     RND, #0x10000
+    bhs     next_lfcs__mine_lfcs_x3
+    b       sha256_12_hashing__mine_lfcs_x3
+
+next_lfcs__mine_lfcs_x3:
+    mov     RND, #0x0
+
+    rev     w10, w10
+    add     w10, w10, #1
+
+    cmp     w10, w11
+    bls     refill_lfcs__mine_lfcs_x3
+
+result_false__mine_lfcs_x3:
+    mov     x0, #0 // false
+    b       result_return__mine_lfcs_x3
+
+result_true_rnd0__mine_lfcs_x3:
+    sub     RND, RND, #1
+
+result_true_rnd1__mine_lfcs_x3:
+    sub     RND, RND, #1
+
+result_true_rnd2__mine_lfcs_x3:
+    mov     x0, #1 // true
+
+result_return__mine_lfcs_x3:
+    mov     w1, RND
+    lsl     x1, x1, #32
+    rev     w10, w10
+    orr     x1, x1, x10
+    str     x1, [x14]
+
+    ld1     { v8.1d - v11.1d }, [sp], #32
+    ld1     { v12.1d - v15.1d }, [sp], #32
+    ret
+
+
+// ---- volatile ----
 //      RRND     w9
 
 #define RDAT0    7
