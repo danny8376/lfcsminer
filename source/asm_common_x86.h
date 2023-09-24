@@ -1,5 +1,7 @@
 #include "asm_common.h"
 
+#define _func __func
+
 #ifdef _WIN32
 
 #define rp1 rcx

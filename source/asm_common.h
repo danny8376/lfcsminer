@@ -1,12 +1,12 @@
 #ifdef __APPLE__
 
-#define _func(name) \
+#define __func(name) \
 .global _##name ; \
 _##name:
 
 #else
 
-#define _func(name) \
+#define __func(name) \
 .global name ; \
 name:
 
