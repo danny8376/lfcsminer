@@ -31,14 +31,14 @@
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
     sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ;
 
-#define _shasr1r(s0, s1, tmpr, regt, nregt, regt2, msg, msg1, msg2, msg3, k) \
+#define _shasr1r(s0, s1, regt, nregt, regt2, msg, msg1, msg2, msg3, k) \
     sha256su0   _V(msg).4s, _V(msg1).4s ; \
     mov     _V(regt2).16b, _V(s0).16b ; \
     add     _V(nregt).4s, _V(msg1).4s, _V(k).4s ; \
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
     sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
     sha256su1   _V(msg).4s, _V(msg2).4s, _V(msg3).4s ;
-#define _shasr2r(s0, s1, tmpr, regt, nregt, regt2, msg, k) \
+#define _shasr2r(s0, s1, regt, nregt, regt2, msg, k) \
     mov     _V(regt2).16b, _V(s0).16b ; \
     add     _V(nregt).4s, _V(msg).4s, _V(k).4s ; \
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
@@ -311,78 +311,78 @@ sha256_12_hashing__mine_lfcs_x2:
 
     // rounds 0-3
     _vldrk(x0, 1, C1)
-    _shasr1r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
 
     // rounds 4-7
     _vldrk(x0, 1, C2)
-    _shasr1r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
 
     // rounds 8-11
     _vldrk(x0, 1, C3)
-    _shasr1r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
 
     // rounds 12-15
     _vldrk(x0, 1, C4)
-    _shasr1r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
 
     // rounds 16-19
     _vldrk(x0, 1, C5)
-    _shasr1r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
 
     // rounds 20-23
     _vldrk(x0, 1, C6)
-    _shasr1r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
 
     // rounds 24-27
     _vldrk(x0, 1, C7)
-    _shasr1r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
 
     // rounds 28-31
     _vldrk(x0, 1, C8)
-    _shasr1r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
 
     // rounds 32-35
     _vldrk(x0, 1, C9)
-    _shasr1r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG0, MSG1, MSG2, MSG3, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG0X, MSG1X, MSG2X, MSG3X, 1)
 
     // rounds 36-39
     _vldrk(x0, 1, C10)
-    _shasr1r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG1, MSG2, MSG3, MSG0, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG1X, MSG2X, MSG3X, MSG0X, 1)
 
     // rounds 40-43
     _vldrk(x0, 1, C11)
-    _shasr1r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
+    _shasr1r(STATE0, STATE1, TMP0, TMP1, 0, MSG2, MSG3, MSG0, MSG1, 1)
+    _shasr1r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG2X, MSG3X, MSG0X, MSG1X, 1)
 
     // rounds 44-47
     _vldrk(x0, 1, C12)
-    _shasr1r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
-    _shasr1r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
+    _shasr1r(STATE0, STATE1, TMP1, TMP0, 0, MSG3, MSG0, MSG1, MSG2, 1)
+    _shasr1r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG3X, MSG0X, MSG1X, MSG2X, 1)
 
     // rounds 48-51
     _vldrk(x0, 1, C13)
-    _shasr2r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG1, 1)
-    _shasr2r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG1X, 1)
+    _shasr2r(STATE0, STATE1, TMP0, TMP1, 0, MSG1, 1)
+    _shasr2r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG1X, 1)
 
     // rounds 52-55
     _vldrk(x0, 1, C14)
-    _shasr2r(STATE0, STATE1, x0, TMP1, TMP0, 0, MSG2, 1)
-    _shasr2r(STATE0X, STATE1X, x0, TMP1X, TMP0X, 0, MSG2X, 1)
+    _shasr2r(STATE0, STATE1, TMP1, TMP0, 0, MSG2, 1)
+    _shasr2r(STATE0X, STATE1X, TMP1X, TMP0X, 0, MSG2X, 1)
 
     // rounds 56-59
     _vldrk(x0, 1, C15)
-    _shasr2r(STATE0, STATE1, x0, TMP0, TMP1, 0, MSG3, 1)
-    _shasr2r(STATE0X, STATE1X, x0, TMP0X, TMP1X, 0, MSG3X, 1)
+    _shasr2r(STATE0, STATE1, TMP0, TMP1, 0, MSG3, 1)
+    _shasr2r(STATE0X, STATE1X, TMP0X, TMP1X, 0, MSG3X, 1)
 
     // rounds 60-63
     mov     v0.16b, V(STATE0).16b
@@ -508,49 +508,49 @@ sha256_12_hashing__mine_lfcs_rk:
     add     V(RTMP0).4s, V(RMSG0).4s, v16.4s
 
     // rounds 0-3
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 17)
+    _shasr1r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 17)
 
     // rounds 4-7
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 18)
+    _shasr1r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 18)
 
     // rounds 8-11
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 19)
+    _shasr1r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 19)
 
     // rounds 12-15
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 20)
+    _shasr1r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 20)
 
     // rounds 16-19
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 21)
+    _shasr1r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 21)
 
     // rounds 20-23
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 22)
+    _shasr1r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 22)
 
     // rounds 24-27
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 23)
+    _shasr1r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 23)
 
     // rounds 28-31
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 24)
+    _shasr1r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 24)
 
     // rounds 32-35
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 25)
+    _shasr1r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG0, RMSG1, RMSG2, RMSG3, 25)
 
     // rounds 36-39
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 26)
+    _shasr1r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG1, RMSG2, RMSG3, RMSG0, 26)
 
     // rounds 40-43
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 27)
+    _shasr1r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG2, RMSG3, RMSG0, RMSG1, 27)
 
     // rounds 44-47
-    _shasr1r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 28)
+    _shasr1r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG3, RMSG0, RMSG1, RMSG2, 28)
 
     // rounds 48-51
-    _shasr2r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG1, 29)
+    _shasr2r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG1, 29)
 
     // rounds 52-55
-    _shasr2r(RSTATE0, RSTATE1, x0, RTMP1, RTMP0, 0, RMSG2, 30)
+    _shasr2r(RSTATE0, RSTATE1, RTMP1, RTMP0, 0, RMSG2, 30)
 
     // rounds 56-59
-    _shasr2r(RSTATE0, RSTATE1, x0, RTMP0, RTMP1, 0, RMSG3, 31)
+    _shasr2r(RSTATE0, RSTATE1, RTMP0, RTMP1, 0, RMSG3, 31)
 
     // rounds 60-63
     mov     v0.16b, V(RSTATE0).16b
