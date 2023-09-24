@@ -59,7 +59,8 @@ uint64_t mine_lfcs_x2(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag,
 
 #elif __aarch64__
 
-uint64_t mine_lfcs(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
+uint64_t mine_lfcs_rk(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
+#define mine_lfcs mine_lfcs_rk
 
 #endif
 

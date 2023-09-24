@@ -29,6 +29,19 @@
     sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
     sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
 
+#define _shasr1r(s0, s1, tmpr, regt, nregt, regt2, msg, msg1, msg2, msg3, k) \
+    sha256su0   _V(msg).4s, _V(msg1).4s ; \
+    mov     _V(regt2).16b, _V(s0).16b ; \
+    add     _V(nregt).4s, _V(msg1).4s, _V(k).4s ; \
+    sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
+    sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
+    sha256su1   _V(msg).4s, _V(msg2).4s, _V(msg3).4s ;
+#define _shasr2r(s0, s1, tmpr, regt, nregt, regt2, msg, k) \
+    mov     _V(regt2).16b, _V(s0).16b ; \
+    add     _V(nregt).4s, _V(msg).4s, _V(k).4s ; \
+    sha256h     _Q(s0), _Q(s1), _V(regt).4s ; \
+    sha256h2    _Q(s1), _Q(regt2), _V(regt).4s ; \
+
 
 .data
 
@@ -65,20 +78,20 @@
 .text
 
 
-# ---- volatile ----
+// ---- volatile ----
 #define RND     w9
 
 #define DAT0    16
 
-#define STATE0 26
-#define STATE1 27
+#define STATE0  26
+#define STATE1  27
 
-#define MSG0   28
-#define MSG1   29
-#define MSG2   30
-#define MSG3   31
+#define MSG0    28
+#define MSG1    29
+#define MSG2    30
+#define MSG3    31
 
-# ---- non-volatile ----
+// ---- non-volatile ----
 
 _func(mine_lfcs) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
     mov     x10, x0
@@ -86,15 +99,16 @@ _func(mine_lfcs) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, u
     mov     x12, x2
     mov     x13, x3
     mov     x14, x4
-    # --------------------------------
-    # | prepare data
-    # RND
+
+    // --------------------------------
+    // | prepare data
+    // RND
     mov     RND, #0x0
-    # prepare new flag (need to be highest 16bit)
+    // prepare new flag (need to be highest 16bit)
     lsl     x12, x12, #48
 
 refill_lfcs__mine_lfcs:
-    # DAT0
+    // DAT0
     rev     w10, w10
     orr     x0, x12, x10 // start_lfcs
     mov     V(DAT0).d[0], x0
@@ -176,7 +190,7 @@ sha256_12_hashing__mine_lfcs:
     add     V(STATE1).4s, V(STATE1).4s, v0.4s
 
     // result hash in high 64bit of STATE1 (swapped double dword)
-    mov     x0, V(STATE1).D[1]
+    mov     x0, V(STATE1).d[1]
 
     cmp     x0, x13
     beq     result_true__mine_lfcs
@@ -209,6 +223,163 @@ result_return__mine_lfcs:
     orr     x1, x1, x10
     str     x1, [x14]
 
+    ret
+
+
+// ---- volatile ----
+//      RRND     w9
+
+#define RDAT0    9
+
+#define RSTATE0  10
+#define RSTATE1  11
+
+#define RMSG0    12
+#define RMSG1    13
+#define RMSG2    14
+#define RMSG3    15
+
+// ---- non-volatile ----
+
+_func(mine_lfcs_rk) // uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result
+    sub     sp, sp, #32
+    st1     { v8.1d - v11.1d }, [sp]
+    sub     sp, sp, #32
+    st1     { v12.1d - v15.1d }, [sp]
+    mov     x10, x0
+    mov     x11, x1
+    mov     x12, x2
+    mov     x13, x3
+    mov     x14, x4
+
+    ldr     x0, =C0
+    ld1     { v16.16b - v19.16b }, [x0], #64
+    ld1     { v20.16b - v23.16b }, [x0], #64
+    ld1     { v24.16b - v27.16b }, [x0], #64
+    ld1     { v28.16b - v31.16b }, [x0], #64
+    // --------------------------------
+    // | prepare data
+    // RND
+    mov     RND, #0x0
+    // prepare new flag (need to be highest 16bit)
+    lsl     x12, x12, #48
+
+refill_lfcs__mine_lfcs_rk:
+    // RDAT0
+    rev     w10, w10
+    orr     x0, x12, x10 // start_lfcs
+    mov     V(RDAT0).d[0], x0
+    ldr     x0, =CD
+    ld1     { V(RDAT0).d }[1], [x0]
+
+sha256_12_hashing__mine_lfcs_rk:
+    // --------------------------------
+    // | ctual sha256_12 hashing
+    // inject rnd into RDAT0
+    mov     V(RDAT0).h[2], RND
+
+    // init state, pre shuffled
+    ldr     x0, =I0
+    ld1     { V(RSTATE0).16b, V(RSTATE1).16b }, [x0]
+
+    // init msg
+    mov     V(RMSG0).16b, V(RDAT0).16b
+    ldr     x0, =D1
+    ld1     { V(RMSG1).16b - V(RMSG3).16b }, [x0]
+
+    add     v0.4s, V(RMSG0).4s, v16.4s
+
+    // rounds 0-3
+    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG0, RMSG1, RMSG2, RMSG3, 17)
+
+    // rounds 4-7
+    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG1, RMSG2, RMSG3, RMSG0, 18)
+
+    // rounds 8-11
+    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG2, RMSG3, RMSG0, RMSG1, 19)
+
+    // rounds 12-15
+    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG3, RMSG0, RMSG1, RMSG2, 20)
+
+    // rounds 16-19
+    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG0, RMSG1, RMSG2, RMSG3, 21)
+
+    // rounds 20-23
+    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG1, RMSG2, RMSG3, RMSG0, 22)
+
+    // rounds 24-27
+    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG2, RMSG3, RMSG0, RMSG1, 23)
+
+    // rounds 28-31
+    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG3, RMSG0, RMSG1, RMSG2, 24)
+
+    // rounds 32-35
+    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG0, RMSG1, RMSG2, RMSG3, 25)
+
+    // rounds 36-39
+    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG1, RMSG2, RMSG3, RMSG0, 26)
+
+    // rounds 40-43
+    _shasr1r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG2, RMSG3, RMSG0, RMSG1, 27)
+
+    // rounds 44-47
+    _shasr1r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG3, RMSG0, RMSG1, RMSG2, 28)
+
+    // rounds 48-51
+    _shasr2r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG1, 29)
+
+    // rounds 52-55
+    _shasr2r(RSTATE0, RSTATE1, x0, 1, 0, 2, RMSG2, 30)
+
+    // rounds 56-59
+    _shasr2r(RSTATE0, RSTATE1, x0, 0, 1, 2, RMSG3, 31)
+
+    // rounds 60-63
+    mov     v2.16b, V(RSTATE0).16b
+    sha256h     Q(RSTATE0), Q(RSTATE1), v1.4s
+    sha256h2    Q(RSTATE1), q2, v1.4s
+
+    // combine state
+    ldr     x0, =I1
+    ld1     { v0.16b }, [x0]
+    add     V(RSTATE1).4s, V(RSTATE1).4s, v0.4s
+
+    // result hash in high 64bit of RSTATE1 (swapped double dword)
+    mov     x0, V(RSTATE1).d[1]
+
+    cmp     x0, x13
+    beq     result_true__mine_lfcs_rk
+
+    add     RND, RND, #1
+    cmp     RND, #0x10000
+    bhs     next_lfcs__mine_lfcs_rk
+    b       sha256_12_hashing__mine_lfcs_rk
+
+next_lfcs__mine_lfcs_rk:
+    mov     RND, #0x0
+
+    rev     w10, w10
+    add     w10, w10, #1
+
+    cmp     w10, w11
+    bls     refill_lfcs__mine_lfcs_rk
+
+result_false__mine_lfcs_rk:
+    mov     x0, #0 // false
+    b       result_return__mine_lfcs_rk
+
+result_true__mine_lfcs_rk:
+    mov     x0, #1 // true
+
+result_return__mine_lfcs_rk:
+    mov     w1, RND
+    lsl     x1, x1, #32
+    rev     w10, w10
+    orr     x1, x1, x10
+    str     x1, [x14]
+
+    ld1     { v8.1d - v11.1d }, [sp], #32
+    ld1     { v12.1d - v15.1d }, [sp], #32
     ret
 
 #endif
