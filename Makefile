@@ -73,6 +73,10 @@ ifeq ($(ARCH), i686)
 	CFLAGS	+= -m64 -msha -msse4.1
 endif
 
+ifeq ($(ARCH), aarch64)
+	CFLAGS  += -march=armv8-a+sha2
+endif
+
 CFLAGS	+=	$(INCLUDE)
 ifeq ($(OS), Darwin)
 	# Assume that we've downloaded OpenSSL through Homebrew

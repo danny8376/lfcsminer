@@ -52,7 +52,16 @@ long long hp_time_diff(struct timespec *pt0, struct timespec *pt1) {
 
 int is_supported_platform();
 
+#ifdef __x86_64__
+
 uint64_t mine_lfcs_x2(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
+#define mine_lfcs mine_lfcs_x2
+
+#elif __aarch64__
+
+uint64_t mine_lfcs(uint32_t start_lfcs, uint32_t end_lfcs, uint16_t new_flag, uint64_t target_hash, uint64_t *result);
+
+#endif
 
 
 int main(int argc, char **argv)
@@ -90,7 +99,7 @@ int main(int argc, char **argv)
 
     get_hp_time(&t0);
 
-    if (!mine_lfcs_x2(start, end, newflag, target, &result)) {
+    if (!mine_lfcs(start, end, newflag, target, &result)) {
         fprintf(stderr, "no hit\n");
 
         get_hp_time(&t1); td = hp_time_diff(&t0, &t1);

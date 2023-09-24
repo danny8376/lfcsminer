@@ -23,4 +23,11 @@ int is_supported_platform() {
     return sha && sse41;
 }
 
+#elif __aarch64__
+
+int is_supported_platform() {
+    // lazy for now
+    return 1;
+}
+
 #endif
