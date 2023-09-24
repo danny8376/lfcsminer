@@ -72,8 +72,6 @@
     C14: .byte 0xEE, 0x82, 0x8F, 0x74, 0x6F, 0x63, 0xA5, 0x78, 0x14, 0x78, 0xC8, 0x84, 0x08, 0x02, 0xC7, 0x8C
     C15: .byte 0xFA, 0xFF, 0xBE, 0x90, 0xEB, 0x6C, 0x50, 0xA4, 0xF7, 0xA3, 0xF9, 0xBE, 0xF2, 0x78, 0x71, 0xC6
 
-    S:   .byte 0x19, 0xCD, 0xE0, 0x5B, 0xAB, 0xD9, 0x83, 0x1F, 0x3A, 0xF5, 0x4F, 0xA5, 0x72, 0xf3, 0x6E, 0x3C
-
 
 .text
 
@@ -182,7 +180,7 @@ sha256_12_hashing__mine_lfcs:
     _shasr1 (STATE0, STATE1, xmm0, MSG3, C15)
 
     # combine state
-    paddd   STATE1, _xmmd(S)
+    paddd   STATE1, _xmmd(I1)
     pshufd  xmm0, STATE0, 0x1B
     pshufd  STATE1, STATE1, 0xB1
     movdqa  STATE0, xmm0
@@ -375,14 +373,14 @@ sha256_12_hashing__mine_lfcs_x2:
     _shasr1 (STATE0X, STATE1X, xmm0, MSG3X, C15)
 
     # combine state
-    paddd   STATE1, _xmmd(S)
+    paddd   STATE1, _xmmd(I1)
     pshufd  xmm0, STATE0, 0x1B
     pshufd  STATE1, STATE1, 0xB1
     movdqa  STATE0, xmm0
     pblendw STATE0, STATE1, 0xF0
     palignr STATE1, xmm0, 8
 
-    paddd   STATE1X, _xmmd(S)
+    paddd   STATE1X, _xmmd(I1)
     pshufd  xmm0, STATE0X, 0x1B
     pshufd  STATE1X, STATE1X, 0xB1
     movdqa  STATE0X, xmm0
