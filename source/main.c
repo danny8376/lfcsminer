@@ -111,7 +111,7 @@ int main(int argc, char **argv)
         get_hp_time(&t1); td = hp_time_diff(&t0, &t1);
         printf("%.2f seconds, %.2f M/s\n", td / 1000000.0, (end - start) * 0x10000 * 1.0 / td);
 
-        return 1;
+        return 8; // 1 is common for terminated on windows (actually depending on the terminator)
     }
 
     get_hp_time(&t1); td = hp_time_diff(&t0, &t1);
