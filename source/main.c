@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
-// borrowed from bfCL by Jimmy-Z
+// borrowed from bfCL by Jimmy-Z with some tweaks
 // https://github.com/Jimmy-Z/bfCL/blob/687acab0c8e21e47253babeea12ec0537a822317/utils.h#L4-L21
 // https://github.com/Jimmy-Z/bfCL/blob/687acab0c8e21e47253babeea12ec0537a822317/utils.c#L66-L90
 
