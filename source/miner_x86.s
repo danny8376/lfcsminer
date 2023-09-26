@@ -2,7 +2,7 @@
 .intel_syntax noprefix
 
 # adopted from: https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-x86.c
-# ref: https://github.com/zoogie/bfCL/blob/master/cl/sha256_16.cl
+# ref: https://github.com/Jimmy-Z/bfCL/blob/master/cl/sha256_16.cl
 
 #include "asm_common_x86.h"
 

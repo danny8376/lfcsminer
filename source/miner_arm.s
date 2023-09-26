@@ -2,7 +2,7 @@
 .arch armv8-a+sha2
 
 # adopted from: https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-arm.c
-# ref: https://github.com/zoogie/bfCL/blob/master/cl/sha256_16.cl
+# ref: https://github.com/Jimmy-Z/bfCL/blob/master/cl/sha256_16.cl
 
 #include "asm_common_arm.h"
 
