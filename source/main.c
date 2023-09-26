@@ -4,7 +4,15 @@
 #include <unistd.h>
 #include <string.h>
 
+// avoid clock_gettime on mingw to avoid libwinpthread dependency
+#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
+
+// lower case for msvc is probably also mostly fine, but well, this is better i believe
 #if defined(_MSC_VER)
+#include <Windows.h>
+#else
+#include <windows.h>
+#endif
 
 typedef LARGE_INTEGER TimeHP;
 #define get_hp_time QueryPerformanceCounter
